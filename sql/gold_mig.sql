@@ -1,28 +1,27 @@
 -- dm 스키마 생성 및 권한 설정
-CREATE SCHEMA IF NOT EXISTS dm; -- ​스테이징/원시 적재용 스키마 생성
-
+CREATE SCHEMA IF NOT EXISTS dm; -- ​gold 데이터 마트 스키마 생성
 
 /*2차 가공본*/
 -- dim_pizza
-CREATE TABLE dim_pizza
+CREATE TABLE dm.dim_pizza
 AS
 SELECT DISTINCT pizza_id, pizza_type_id, size, price
-FROM ods_orders
+FROM ods.ods_orders
 
 --dim_회원
-CREATE TABLE dim_member 
+CREATE TABLE dm.dim_member 
 AS
 SELECT DISTINCT member_id, member_nm 
-FROM ods_orders
+FROM ods.ods_orders
 
 --dim pizza_type
-CREATE TABLE dim_pizza_type 
+CREATE TABLE dm.dim_pizza_type
 AS
-SELECT DISTINCT pizza_type_id, pizza_nm, category
-FROM ods_orders
+SELECT DISTINCT pizza_type_id, pizza_nm, pizza_categ
+FROM ods.ods_orders
 
 --dim date
-CREATE TABLE dim_date
+CREATE TABLE dm.dim_date
 AS
 SELECT
   TO_DATE(date, 'YYYY-MM-DD') AS date,
@@ -38,31 +37,31 @@ SELECT
   FROM 
   (
   	SELECT DISTINCT date
-	FROM ods_orders
+	FROM ods.ods_orders
 )
 
 --dim branch
-CREATE TABLE dim_branch
+CREATE TABLE dm.dim_branch
 AS
 SELECT DISTINCT bran_id, bran_nm
-FROM ods_orders
+FROM ods.ods_orders
 
 --dim pizza_topping
-CREATE TABLE dim_pizza_topping
+CREATE TABLE dm.dim_pizza_topping
 AS
 SELECT DISTINCT pizza_topping_id, pizza_topping_nm
-FROM ods_orders
+FROM ods.ods_orders
 
 --Bridge Table
-CREATE TABLE bridge_pizza_type_topping
+CREATE TABLE dm.bridge_pizza_type_topping
 AS
 SELECT DISTINCT pizza_type_id, pizza_topping_id
-FROM ods_orders
+FROM ods.ods_orders
 
 -- fact_주문
-CREATE TABLE fact_order
+CREATE TABLE dm.fact_order
 AS
-SELECT DISTINCT order_details_id, order_id, date, member_id, pizza_id, pizza_type_id , pizza_topping_id, time, size, quantity, 
+SELECT DISTINCT order_detail_id, order_id, date, member_id, pizza_id, pizza_type_id , pizza_topping_id, time, size, quantity, 
 	price as unit_price, bran_id, (price * quantity ) total_price
-FROM ods_orders
+FROM ods.ods_orders
 
